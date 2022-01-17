@@ -1,10 +1,9 @@
 var eve = require('evejs');
- 
 let alg = 0;
 function NimAgent(id, algoritam) {
-  console.log(`${id}: Pokrećem se s ${algoritam ? 'pravim' : 'random'} algoritmom`);
-  eve.Agent.call(this, id);
   alg = algoritam;
+  console.log(`${id}: Pokrećem se s ${alg ? 'pravim' : 'random'} algoritmom`);
+  eve.Agent.call(this, id);
   this.connect(eve.system.transports.getAll());
 }
  
@@ -29,6 +28,7 @@ const drawCurrState = (state) => {
 
 function resolveAfterDelay() {
   return new Promise(resolve => {
+    resolve();
     setTimeout(() => {
       resolve();
     }, 500);
@@ -57,20 +57,24 @@ async function randomAlg (currState, sender) {
 }
 
 async function praviAlg (currState, sender) {
-  var currState_xor = currState.reduce((r, e) => r ^ e, 0);
-  var is_endgame = currState.reduce((r, e) => r + (e > 1), 0) < 2;
-  var move = currState.reduce((move, stack, i) => {
+  var tmp = currState;
+  var currState_xor = tmp.reduce((r, e) => r ^ e, 0);
+  var is_endgame = tmp.reduce((r, e) => r + (e > 1), 0) < 2;
+  var move = tmp.reduce((move, stack, i) => {
     var take = stack - (is_endgame ^ stack ^ currState_xor);
-    return take > move[1] ? [i, take] : move;
+     return take > move[1] ? [i, take] : move;
   }, [0, 0]);
   if(move[1] > 0) {
     await resolveAfterDelay();
-    currState[move[0]] -= move[1];
+    console.log(`${this.id}: Vučem ${move[1]} iz ${move[0]}. reda`);
+    tmp[move[0]] -= move[1];
+    drawCurrState(tmp);
     await resolveAfterDelay();
-    this.send(sender, {state: currState});
+    this.send(sender, {state: tmp});
+    return;
   } else {
-    console.log(`${this.id}: Ne znam optimalni potez, izvlačim nasumično`);
-    randomAlg(currState, sender);
+    randomAlg.call(this, currState, sender);
+    return;
   }
 }
 

@@ -22,6 +22,6 @@ console.log("Početno stanje:");
 drawCurrState(currState);
 
 var agent1 = new NimAgent('agent1', 1);
-var agent2 = new NimAgent('agent2', 0);
+var agent2 = new NimAgent('agent2', 1);
  
 agent2.send('agent1', {state: currState});
